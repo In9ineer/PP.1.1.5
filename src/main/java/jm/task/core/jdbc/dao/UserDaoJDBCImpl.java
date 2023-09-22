@@ -1,85 +1,73 @@
 package jm.task.core.jdbc.dao;
+
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
     public UserDaoJDBCImpl() {
-
     }
 
-    public void createUsersTable() {                                        //создать таблицу пользователей
-        try (Connection connection = Util.open()) {
-            Statement statement = connection.createStatement();
+    Connection connection = Util.getConnection();
 
-            statement.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS users (" +
-                    "id BIGINT NOT NULL AUTO_INCREMENT, " +
-                    "name VARCHAR(100) NOT NULL, " +
-                    "lastName VARCHAR(100) NOT NULL, " +
-                    "age TINYINT NOT NULL, " +
-                    "PRIMARY KEY (id)" +
-                    ")"
-            );
-            System.out.println("Таблица users успешно создана.");
+    public void createUsersTable() {                                        //создать таблицу пользователей
+        String sql = "CREATE TABLE IF NOT EXISTS users (" +
+                "id BIGINT NOT NULL AUTO_INCREMENT, " +
+                "name VARCHAR(100) NOT NULL, " +
+                "lastName VARCHAR(100) NOT NULL, " +
+                "age TINYINT NOT NULL, " +
+                "PRIMARY KEY (id)" +
+                ")";
+        try (PreparedStatement statement = connection.prepareStatement(sql);) {
+            statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Ошибка при создании таблицы users.");
             e.printStackTrace();
         }
     }
 
     public void dropUsersTable() {                                          //удалить таблицу пользователей
-        try (Connection connection = Util.open()) {
-            Statement statement = connection.createStatement();
-
-            statement.executeUpdate("DROP TABLE IF EXISTS users");
-            System.out.println("Таблица users успешно удалена.");
+        String sql = "DROP TABLE IF EXISTS users";
+        try (PreparedStatement statement = connection.prepareStatement(sql);) {
+            statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Ошибка при удалении таблицы users.");
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {          //сохранить пользователя
+        String sql = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
 
-        try (Connection connection = Util.open()) {
-            String sql = "INSERT INTO users (name, lastName, age) VALUES (?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = connection.prepareStatement(sql);) {
             statement.setString(1, name);
             statement.setString(2, lastName);
             statement.setInt(3, age);
 
-            int rowsAffected = statement.executeUpdate();
-            System.out.println("User с именем – " + name + " добавлен в базу данных");
+            statement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Ошибка при добавлении записи пользователя.");
             e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {                                   //удалить пользователя по id
-        Connection connection = Util.open();
+        String sql = "DELETE FROM users WHERE id = ?";
 
-        try {
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id = ?");
+        try (PreparedStatement statement = connection.prepareStatement(sql);) {
             statement.setLong(1, id);
             statement.executeUpdate();
-            System.out.println("Запись с id " + id + " успешно удалена из таблицы.");
         } catch (SQLException e) {
-            System.out.println("Ошибка удаления записи из таблицы: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-
     public List<User> getAllUsers() {                                       //получить всех польхователей
         List<User> people = new ArrayList<>();
 
-        try (Connection connection = Util.open()) {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
+        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");) {
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -99,12 +87,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {                                         // очистить таблицу пользователей
-        try (Connection connection = Util.open();
-             PreparedStatement statement = connection.prepareStatement("DELETE FROM users")) {
+        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM users")) {
             statement.executeUpdate();
-            System.out.println("Таблица users успешно очищена.");
         } catch (SQLException e) {
-            System.out.println("Ошибка очистки таблицы users: " + e.getMessage());
+            e.getMessage();
         }
     }
 }
