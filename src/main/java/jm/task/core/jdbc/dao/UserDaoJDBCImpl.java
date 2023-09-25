@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
+
+    private static final Connection connection = Util.getConnection();
+
     public UserDaoJDBCImpl() {
     }
-
-    Connection connection = Util.getConnection();
 
     public void createUsersTable() {                                        //создать таблицу пользователей
         String sql = "CREATE TABLE IF NOT EXISTS users (" +
