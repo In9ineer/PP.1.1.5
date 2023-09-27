@@ -32,7 +32,7 @@ public class Util {
         return connection;
     }
 
-    public static SessionFactory getSession() {
+    public static SessionFactory getSessionFactory() {
         SessionFactory sessionFactory = null;
         try {
             Configuration configuration = new Configuration();
@@ -51,13 +51,6 @@ public class Util {
         }
         return sessionFactory;
     }
-
-
-//    public static SessionFactory getSession() {
-//        SessionFactory factory = new Configuration()
-//                .configure("hibernate.properties")
-//                .addAnnotatedClass(User.class)
-//                .buildSessionFactory();
-//        return factory;
-//    }
 }
+
+
